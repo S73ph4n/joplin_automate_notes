@@ -1,5 +1,7 @@
 # Link to note
 
+![](demo_gif.gif)
+
 This plugin adds an icon to the toolbar. When clicked, it creates a link to the note with a title matching the selected text (or, if such a note does not exist, creates it).
 
 Also adds a link back to the current note.
