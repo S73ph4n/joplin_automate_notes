@@ -1,6 +1,6 @@
 # Automate notes with JS
 
-Finds blocks of javascript in the current note (blocks have to start with "```javascript" and end with "```") and runs it as a function. Writes whatever it returns in a "results" block right under your code.
+Finds blocks of javascript in the current note (blocks have to start with "\```javascript" and end with "\```") and runs it as a function. Writes whatever it returns in a "results" block right under your code.
 
 This only works on notes with a title starting with "[Run]", so you don't end up running all the example javascript snippets you have stored somewhere.
 
