@@ -1,53 +1,80 @@
 import joplin from 'api';
 import { ToolbarButtonLocation } from 'api/types';
-
 joplin.plugins.register({
 	onStart: async function() {
-		joplin.commands.register({
-			name: 'linkMaker',
-			label: 'Link to corresponding note. Creates it if needed.',
-			iconName: 'fas fa-external-link-alt',
-			execute: async () => {
-				const notes = (await joplin.data.get(['notes']));
-				const currentNote = await joplin.workspace.selectedNote();	
-				const selectedText = (await joplin.commands.execute('selectedText') as string);
-				
-				if (selectedText !== ""){
-					//console.info('Clic !', selectedText);
+		// Create the panel object
+		//const panel = await joplin.views.panels.create();
+		//await joplin.views.panels.setHtml(panel, 'Loading...');
 
-					//Check if note already exists
-					var idLinkedNote = 0;
-					for (let i in notes.items){
-						//console.info(notes.items[i].title);
-						if (notes.items[i].title.toLowerCase() === selectedText.toLowerCase()){
-							idLinkedNote = notes.items[i].id;	
-							console.info('Found note with title ', notes.items[i].title, selectedText ,idLinkedNote);
-							break;
+		async function runNoteJs() {
+			// Get the current note from the workspace.
+			const note = await joplin.workspace.selectedNote();
+
+				// Keep in mind that it can be `null` if nothing is currently selected!
+			if (note) {
+				// Only run if title matches this :
+				if (note.title.includes('[Run]')){
+					console.info('Note content has changed! New note is:', note);
+					var body = note.body.split('\n');
+					var i = 0;
+					while (i < body.length){
+						if (body[i].startsWith('```') && body[i].includes('javascript')){ //found a block
+							i++;
+							var code = "";
+							while (i < body.length){
+								if (body[i].startsWith('```')){//end of the block
+									break;
+								}
+								code += body[i] + '\n';
+								i++;
+							}
+							// run the block
+							console.info('Running code block...');
+							console.info(code);
+							var noteFunction = new Function ('note', code);
+							var codeResult = await noteFunction(note);
+							//var codeResult = eval(code);
+							i++;
+							var iStart = i;
+							//if result exists :
+							if (i < body.length && body[i].startsWith('```results')){ //go to the bottom of it
+								i++;
+								while (i < body.length){
+									if (body[i].startsWith('```')){
+										i++; 
+										break;
+									}
+									i++
+								}
+							}
+							var iEnd = i;
+							var newBody = body.slice(0, iStart).concat(['```results'],[codeResult],['```'],body.slice(iEnd)).join('\n');
+							console.info(newBody);
+							await joplin.data.put(['notes', note.id], null, { body: newBody});
+						}
+						else{
+							i++;
 						}
 					}
-
-
-					//Else : make it:
-					if (idLinkedNote === 0){
-						const newNote = await joplin.data.post(['notes'], null, { body: "", title: selectedText});
-						idLinkedNote = newNote.id
-					}
-
-					//console.info(idLinkedNote);
-					
-					//Insert backlink :
-					const backlink = 'Linked from [' + currentNote.title + '](:/' + currentNote.id + ')';
-					const bodyLinkedNote = (await joplin.data.get(['notes', idLinkedNote.toString()], { fields: ['body'] })).body;
-					const newBodyLinkedNote = bodyLinkedNote + "\n" + backlink;
-					await joplin.data.put(['notes', idLinkedNote.toString()], null, { body: newBodyLinkedNote });
-
-					const linkToNewNote = '[' + selectedText + '](:/' + idLinkedNote + ')';
-
-					await joplin.commands.execute('replaceSelection', linkToNewNote);
 				}
-			},
+			}
+			else {
+				console.info('No note is selected');
+			}
+		}
+
+		// This event will be triggered when the user selects a different note
+		await joplin.workspace.onNoteSelectionChange(() => {
+			runNoteJs();
 		});
-		
-		joplin.views.toolbarButtons.create('linkMaker', ToolbarButtonLocation.EditorToolbar);
+
+		// This event will be triggered when the content of the note changes
+		// as you also want to update the TOC in this case.
+		await joplin.workspace.onNoteContentChange(() => {
+			runNoteJs();
+		});
+
+		// Also update the TOC when the plugin starts
+		runNoteJs();
 	},
 });
