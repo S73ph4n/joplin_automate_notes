@@ -6,6 +6,8 @@ Finds blocks of javascript in the current note (blocks have to start with "\```j
 
 This only works on notes with a title starting with "[Run]", so you don't end up running all the example javascript snippets you have stored somewhere.
 
+This plugin is experimental and comes with absolutely no warranty of any kind. Use at your own risk.
+
 ## Joplin Plugin
 
 The main two files you will want to look at are:
