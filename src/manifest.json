@@ -1,9 +1,8 @@
 {
 	"manifest_version": 1,
-	"app_min_version": "1.4",
-	"name": "Run JS from note",
-	"description": "Find javascript blocks of code in the note and run them.",
-	"version": "0.1",
+	"name": "Automate Notes",
+	"description": "Runs javascript code blocks in a note",
+	"version": "1.0.0",
 	"author": "S73ph4n",
-	"homepage_url": "https://github.com/S73ph4n"
+	"homepage_url": ""
 }
