@@ -2,7 +2,7 @@
 	"manifest_version": 1,
 	"id": "com.s73ph4n.automate_notes",
 	"app_min_version": "2.0",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"name": "Automate Notes",
 	"description": "Finds blocks of javascript in the current note (blocks have to start with '```javascript' and end with '```') and runs it as a function. ",
 	"author": "S73ph4n",
